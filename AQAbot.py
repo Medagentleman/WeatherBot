@@ -5,9 +5,9 @@ import logging
 
 
 # Токен бота
-BOT_Key = '6488400738:AAG8kdOevE5F492SyVhjHj0u-dI-HOkaozw'
+BOT_Key = 'токен, сгенерированный при помощи @https://t.me/BotFather'
 # API ключ для OpenWeatherMap
-OWM_API_KEY = '80761451faa88f7675b581a60f013060'
+OWM_API_KEY = 'токен, полученный openweathermap.org '
 # Указываем токен
 bot = telebot.TeleBot(BOT_Key)
 
