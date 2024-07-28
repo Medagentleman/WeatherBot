@@ -1,23 +1,52 @@
-WeatherBot
-Description
-WeatherBot is a Telegram bot that provides current weather information for various cities in Russia. Users can select a city from a convenient list and instantly receive data about the current weather. The bot uses the OpenWeatherMap API to fetch data and the Telegram API for user interaction.
+# Weather Bot 🌤️
 
-Technologies
-Python: The primary programming language used to implement the bot.
-python-telegram-bot: Library for interacting with the Telegram Bot API.
-Requests: Library for making HTTP requests to the OpenWeatherMap API.
-Logging: Module for logging bot activity and errors.
-OpenWeatherMap API: External API for fetching current weather data.
-Functionality
-/start Command: Sends a welcome message and instructions on how to select a city.
-/help Command: Displays a list of available commands and instructions.
-/history Command: Shows the user's query history.
-/stats Command: Provides statistics on the most requested cities.
-Logging
-Bot logs are saved in the bot.log file, which helps track all requests, errors, and user actions for easier debugging and monitoring.
+Welcome to the Weather Bot! This bot provides real-time weather updates for various world capitals. Just select a city from the list, and the bot will fetch the current weather information for you.
 
-Links
-Telegram Bot API Documentation
-OpenWeatherMap API Documentation
-License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+## Features
+
+- **Real-time Weather Information**: Get the latest weather updates for world capitals.
+- **User-friendly Interface**: Easy-to-use keyboard interface to select cities.
+- **Logging**: Detailed logging of user interactions and weather requests.
+
+## Technologies Used
+
+- **Python**: The core programming language.
+- **pyTelegramBotAPI**: A Python wrapper for the Telegram Bot API.
+- **OpenWeatherMap API**: For fetching real-time weather data.
+- **Logging**: For recording bot activities and user interactions.
+
+## Setup and Installation
+
+### Prerequisites
+
+- Python 3.7+
+- A Telegram Bot token from [BotFather](https://core.telegram.org/bots#botfather)
+- An API key from [OpenWeatherMap](https://home.openweathermap.org/users/sign_up)
+
+### Installation Steps
+
+1. **Clone the repository**:
+    ```sh
+    git clone https://github.com/your-username/weather-bot.git
+    cd weather-bot
+    ```
+
+2. **Create a virtual environment**:
+    ```sh
+    python -m venv venv
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    ```
+
+3. **Install dependencies**:
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+4. **Configure your tokens**:
+   Update the `BOT_KEY` and `OWM_API_KEY` in the script with your Telegram Bot token and OpenWeatherMap API key, respectively.
+
+### Running the Bot
+
+Run the bot with the following command:
+```sh
+python weather_bot.py
