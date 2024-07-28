@@ -1,97 +1,111 @@
-import os
 import telebot
-import logging
-import requests
 from telebot import types
+import requests
+import logging
+import time
 
-# Получение токенов из переменных окружения
-BOT_KEY = os.getenv('BOT_KEY', 'bot token from Telegram APP')
-OWM_API_KEY = os.getenv('OWM_API_KEY', 'API from weather resourse')
-
-# Указываем токен
+# Bot token
+BOT_KEY = 'YOUR TELEGRAM TOKEN'
+# API key for OpenWeatherMap
+OWM_API_KEY = 'YOUR API TOKEN'
+# Setting the token
 bot = telebot.TeleBot(BOT_KEY)
 
-# Настройка логирования
-logging.basicConfig(
-    filename='bot.log',
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO,
-    encoding='utf-8'  # Добавлена кодировка utf-8
-)
-logger = logging.getLogger(__name__)
+# Logging setup
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-# Список крупных городов России
-RUSSIAN_CITIES = [
-    ["Москва", "Мюнхен", "Нью-Йорк", "Мурманск"],
-    ["Нижний Новгород", "Казань", "Челябинск", "Омск"],
-    ["Самара", "Ростов-на-Дону", "Уфа", "Красноярск"],
-    ["Пермь", "Воронеж", "Волгоград", "Краснодар"],
-    ["Саратов", "Тюмень", "Тольятти", "Ижевск"]
+# File handler for logging
+file_handler = logging.FileHandler('bot.log', encoding='utf-8')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+# Console handler for logging
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
+# Updated list of world capitals
+WORLD_CITIES = [
+    ["Moscow", "Washington", "London"],
+    ["Beijing", "Tokyo", "Berlin"],
+    ["Paris", "Rome", "Madrid"],
+    ["Ottawa", "Canberra", "Brasília"],
+    ["New Delhi", "Buenos Aires", "Cairo"],
+    ["Ankara", "Riyadh", "Tehran"],
+    ["Mexico City", "Pretoria", "Wellington"],
+    ["Seoul", "Bangkok", "Hanoi"],
+    ["Jakarta", "Nairobi", "Baghdad"],
+    ["Dhaka", "Athens", "Helsinki"]
 ]
 
-# Получение погоды в указанном городе
+# Function to get weather in a specified city
 def get_weather(city):
-    logger.info(f"Attempting to get weather for city: {city}")
+    start_time = time.time()  # Record the start time
     try:
-        url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={OWM_API_KEY}&units=metric&lang=ru'
+        # API request to OpenWeatherMap
+        url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={OWM_API_KEY}&units=metric&lang=en'
         response = requests.get(url)
-        response.raise_for_status()  # Проверяем успешность запроса
+        response.raise_for_status()  # Check if the request was successful
         data = response.json()
         weather_description = data['weather'][0]['description']
         temperature = data['main']['temp']
-        logger.info(f"Successfully got weather for city: {city}")
-        return f"Погода в городе {city}: {weather_description.capitalize()}, температура: {temperature}°C"
+        duration = time.time() - start_time  # Calculate the request duration
+        logger.info(f"Weather request for {city} completed in {duration:.2f} seconds")
+        return f"Weather in {city}: {weather_description.capitalize()}, Temperature: {temperature}°C"
     except (requests.exceptions.RequestException, KeyError) as e:
-        logger.error(f"Error getting weather for city {city}: {e}")
-        return f"Ошибка при получении погоды: {e}"
+        duration = time.time() - start_time  # Calculate the request duration in case of error
+        logger.error(f"Weather request for {city} failed in {duration:.2f} seconds: {e}")
+        return f"Error getting weather: {e}"
 
-# Клавиатура для выбора города
+# Function to create a keyboard with city buttons
 def create_city_keyboard():
-    markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    for row in RUSSIAN_CITIES:
+    markup = types.ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
+    for row in WORLD_CITIES:
         buttons = [types.KeyboardButton(city) for city in row]
         markup.add(*buttons)
     return markup
 
-# Обработчик команды /start
+# Handler for the /start command
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    user = message.from_user
-    logger.info(f"User {user.id} ({user.username}) started the bot")
-    bot.send_message(
-        message.chat.id,
-        "Привет! Я бот, который может сообщить тебе погоду в различных городах России. Выбери город из списка ниже:",
-        reply_markup=create_city_keyboard()
-    )
+    user_info = f"User {message.from_user.id} ({message.from_user.username}) from {message.chat.id}, first_name: {message.from_user.first_name}, last_name: {message.from_user.last_name}"
+    logger.info(f"{user_info} started the bot")
+    bot.send_message(message.chat.id,
+                     "Hello! I am a bot that can tell you the weather in various world capitals. Choose a city from the list below:",
+                     reply_markup=create_city_keyboard())
 
-# Обработчик текстовых сообщений и кнопок
+# Handler for text messages and buttons
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
-    user = message.from_user
     text = message.text
-    logger.info(f"User {user.id} ({user.username}) sent message: {text}")
+    user_info = f"User {message.from_user.id} ({message.from_user.username}) from {message.chat.id}, first_name: {message.from_user.first_name}, last_name: {message.from_user.last_name}"
 
-    if any(text in row for row in RUSSIAN_CITIES):
-        logger.info(f"User {user.id} ({user.username}) requested weather for {text}")
+    # Check if the message text matches any city in the list
+    if any(text in row for row in WORLD_CITIES):
+        logger.info(f"{user_info} requested weather for {text}")
         weather = get_weather(text)
         bot.send_message(message.chat.id, weather)
+        logger.info(f"{user_info} received weather info for {text}")
     else:
-        logger.warning(f"User {user.id} ({user.username}) sent invalid message")
-        bot.send_message(
-            message.chat.id,
-            "Выбери город из списка ниже:",
-            reply_markup=create_city_keyboard()
-        )
+        logger.warning(f"{user_info} sent invalid message: {text}")
+        bot.send_message(message.chat.id, "Choose a city from the list below:", reply_markup=create_city_keyboard())
+        logger.info(f"{user_info} prompted to choose a city again")
 
-# Обработчик входящих текстовых сообщений
-@bot.message_handler(content_types=['text'])
+# Handler for incoming text messages
+@bot.message_handler(content_types=['text', 'photo', 'video'])
 def handle_text(message):
-    user = message.from_user
-    logger.info(f"User {user.id} ({user.username}) sent unrecognized message: {message.text}")
-    bot.send_message(
-        message.chat.id,
-        "Извините, я не понимаю вашего сообщения. Пожалуйста, выберите город из списка ниже:",
-        reply_markup=create_city_keyboard()
-    )
+    user_info = f"User {message.from_user.id} ({message.from_user.username}) from {message.chat.id}, first_name: {message.from_user.first_name}, last_name: {message.from_user.last_name}"
+    if message.content_type == 'text':
+        logger.info(f"{user_info} sent text message: {message.text}")
+    elif message.content_type == 'photo':
+        logger.info(f"{user_info} sent photo")
+    elif message.content_type == 'video':
+        logger.info(f"{user_info} sent video")
+    bot.send_message(message.chat.id,
+                     "Sorry, I don't understand your message. Please choose a city from the list below:",
+                     reply_markup=create_city_keyboard())
 
+# Start polling for messages
 bot.polling(none_stop=True, interval=0)
