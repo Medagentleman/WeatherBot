@@ -5,9 +5,9 @@ import logging
 import time
 
 # Bot token
-BOT_KEY = 'YOUR TELEGRAM TOKEN'
+BOT_KEY = '01234567890'
 # API key for OpenWeatherMap
-OWM_API_KEY = 'YOUR API TOKEN'
+OWM_API_KEY = '01234567890'
 # Setting the token
 bot = telebot.TeleBot(BOT_KEY)
 
@@ -73,39 +73,36 @@ def send_welcome(message):
     user_info = f"User {message.from_user.id} ({message.from_user.username}) from {message.chat.id}, first_name: {message.from_user.first_name}, last_name: {message.from_user.last_name}"
     logger.info(f"{user_info} started the bot")
     bot.send_message(message.chat.id,
-                     "Hello! I am a bot that can tell you the weather in various world capitals. Choose a city from the list below:",
+                     f"Hello, {message.from_user.first_name}! I'm here to help you find the weather in various world capitals. Please choose a city from the list below:",
                      reply_markup=create_city_keyboard())
 
-# Handler for text messages and buttons
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-    text = message.text
-    user_info = f"User {message.from_user.id} ({message.from_user.username}) from {message.chat.id}, first_name: {message.from_user.first_name}, last_name: {message.from_user.last_name}"
-
-    # Check if the message text matches any city in the list
-    if any(text in row for row in WORLD_CITIES):
-        logger.info(f"{user_info} requested weather for {text}")
-        weather = get_weather(text)
-        bot.send_message(message.chat.id, weather)
-        logger.info(f"{user_info} received weather info for {text}")
-    else:
-        logger.warning(f"{user_info} sent invalid message: {text}")
-        bot.send_message(message.chat.id, "Choose a city from the list below:", reply_markup=create_city_keyboard())
-        logger.info(f"{user_info} prompted to choose a city again")
-
-# Handler for incoming text messages
+# Handler for all types of messages
 @bot.message_handler(content_types=['text', 'photo', 'video'])
-def handle_text(message):
+def handle_message(message):
     user_info = f"User {message.from_user.id} ({message.from_user.username}) from {message.chat.id}, first_name: {message.from_user.first_name}, last_name: {message.from_user.last_name}"
+
     if message.content_type == 'text':
-        logger.info(f"{user_info} sent text message: {message.text}")
+        text = message.text
+        logger.info(f"{user_info} sent text message: {text}")
+
+        # Check if the message text matches any city in the list
+        if any(text in row for row in WORLD_CITIES):
+            logger.info(f"{user_info} requested weather for {text}")
+            weather = get_weather(text)
+            bot.send_message(message.chat.id, weather)
+            logger.info(f"{user_info} received weather info for {text}")
+        else:
+            logger.warning(f"{user_info} sent invalid message: {text}")
+            bot.send_message(message.chat.id, f"Hi again, {message.from_user.first_name}! Please choose a city from the list below:", reply_markup=create_city_keyboard())
+            logger.info(f"{user_info} prompted to choose a city again")
+
     elif message.content_type == 'photo':
         logger.info(f"{user_info} sent photo")
+        bot.send_message(message.chat.id, "Nice photo! But I can only tell you the weather.")
+
     elif message.content_type == 'video':
         logger.info(f"{user_info} sent video")
-    bot.send_message(message.chat.id,
-                     "Sorry, I don't understand your message. Please choose a city from the list below:",
-                     reply_markup=create_city_keyboard())
+        bot.send_message(message.chat.id, "Interesting video! But let's talk about the weather instead.")
 
 # Start polling for messages
 bot.polling(none_stop=True, interval=0)
