@@ -5,9 +5,9 @@ import logging
 import time
 
 # Bot token
-BOT_KEY = '01234567890'
+BOT_KEY = '6488400738:AAFvXFQayzvyPGrJj9ePvIxLCtltGeBqrS4'
 # API key for OpenWeatherMap
-OWM_API_KEY = '01234567890'
+OWM_API_KEY = '4b98e9b79a1431837e9129ea3a32a69b'
 # Setting the token
 bot = telebot.TeleBot(BOT_KEY)
 
