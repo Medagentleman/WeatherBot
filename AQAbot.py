@@ -11,8 +11,6 @@ OWM_API_KEY = '00000000000000000000000000000'
 # Setting the token
 bot = telebot.TeleBot(BOT_KEY)
 
-bot = telebot.TeleBot(BOT_KEY)
-
 # Logging setup
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
